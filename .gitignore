@@ -1,0 +1,5 @@
+__pycache__
+OneShotAlembic
+alembic.ini
+fastapi-env
+.vscode
