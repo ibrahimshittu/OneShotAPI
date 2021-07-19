@@ -35,22 +35,19 @@ get_db = database.get_db
 
 @router.post('/{contest_id}/submission', status_code=status.HTTP_201_CREATED)
 async def submit_submission(contest_id: int, users_id: int, body: Optional[str] = None,
-                            db: Session = Depends(get_db), file: Optional[UploadFile] = File(None)):
+                            db: Session = Depends(get_db), file: Optional[List[UploadFile]] = File(None)):
     contest = db.query(models.create_contest).filter(
         models.create_contest.id == contest_id).first()
-
-    # contests_category2 = db.query(models.create_contest).filter(
-    # models.create_contest.id == contest_id).
-    # filter(models.create_contest.contest_category == schemas.ContestType.Essay_Contest).first()
-
     if not contest:
         return HTTPException(status_code=404, detail="Contest not found")
     else:
         try:
-            file_location = f"media/{file.filename}"
-            with open(file_location, "wb") as img:
-                shutil.copyfileobj(file.file, img)
-            url = str(f'media/{file.filename}')
+            for files in file:
+                file_location = f"media/{files.filename}"
+                with open(file_location, "wb") as img:
+                    shutil.copyfileobj(files.file, img)
+
+                url = f'media/{[files.filename for files in file]}'
         except Exception as e:
             url = ""
         new_submission = models.essay_submission(image=url, body=body,
