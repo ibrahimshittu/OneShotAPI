@@ -12,27 +12,6 @@ router = APIRouter(tags=['Submission'], prefix="/contest")
 get_db = database.get_db
 
 
-# @router.get("{contest_id}/submissions/", response_model=schemas.Submission)
-# def get_submissions(contest_id: int,
-#                     db: Session = Depends(get_db)):
-#     """
-#     Get all submissions for a given contest
-#     """
-#     contests_category = contest = db.query(models.create_contest).filter(
-#         models.create_contest.contest_category == "Essay Contest").first()
-#     try:
-#         contest = db.query(models.Contest).filter(
-#             models.create_contest.id == contest_id).one()
-#         if contest is None:
-#             raise HTTPException(status_code=404, detail="Contest not found")
-#         submissions = contest.submissions
-#         return schemas.SubmissionSchema(many=True).dump(submissions)
-#     except HTTPException as e:
-#         raise e
-#     except Exception as e:
-#         raise HTTPException(status_code=500, detail=str(e))
-
-
 @router.post('/{contest_id}/submission', status_code=status.HTTP_201_CREATED)
 async def submit_submission(contest_id: int, users_id: int, body: Optional[str] = None,
                             db: Session = Depends(get_db), file: Optional[List[UploadFile]] = File(None)):
@@ -56,3 +35,22 @@ async def submit_submission(contest_id: int, users_id: int, body: Optional[str] 
     db.commit()
     db.refresh(new_submission)
     return new_submission
+
+
+@router.get('/{contest_id}/submission/', response_model=List[schemas.essay_submission_list], status_code=status.HTTP_200_OK)
+def get_submission(contest_id: int, db: Session = Depends(get_db)):
+    submission = db.query(models.essay_submission).filter(
+        models.essay_submission.contest_id == contest_id).all()
+    if not submission:
+        return HTTPException(status_code=404, detail="Submission not found")
+    return submission
+
+
+@router.get('/{contest_id}/submission/{submission_id}', response_model=schemas.essay_submission_list)
+def get_submission_by_id(contest_id: int, submission_id: int, db: Session = Depends(get_db)):
+    submission = db.query(models.essay_submission).filter(
+        models.essay_submission.contest_id == contest_id).filter(
+        models.essay_submission.id == submission_id).first()
+    if not submission:
+        return HTTPException(status_code=404, detail="Submission not found")
+    return submission

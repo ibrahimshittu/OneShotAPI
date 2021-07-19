@@ -76,17 +76,3 @@ class essay_submission(Base):
 
     contestant = relationship("User", back_populates="submission")
     contest = relationship("create_contest", back_populates="essay_sub")
-
-
-# class comment_reply(Base):
-#     __tablename__ = "comments reply"
-
-#     id = Column(Integer, primary_key=True, index=True)
-#     created_date = Column(DateTime, default=datetime.datetime.utcnow)
-#     body = Column(String)
-#     is_active = Column(Boolean, default=True)
-#     user_id = Column(Integer, ForeignKey("users.id"))
-#     comment_id = Column(Integer, ForeignKey("comments.id"))
-
-#     comment = relationship("Comments", back_populates="reply")
-#     user = relationship("User", back_populates="comments_reply")

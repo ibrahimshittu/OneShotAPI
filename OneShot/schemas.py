@@ -109,23 +109,14 @@ class comments_List(BaseModel):
     contest_items: show_create_contest_List
 
 
-class comment_reply(BaseModel):
+class essay_submission(BaseModel):
     created_date: datetime
-    body: str
-    is_active: bool
+    body: Optional[str] = Field(..., max_length=3000)
 
 
-class show_comment_reply(BaseModel):
-    created_date = datetime
-    body: str
-    is_active: bool
-    user_id: int
-    comment_id: int
+class essay_submission_list(essay_submission):
+    image: str
+    contestant: Show_user_List
 
     class Config():
         orm_mode = True
-
-
-class essay_submission(BaseModel):
-    created_date: datetime
-    body: str = Field(..., max_length=3000)

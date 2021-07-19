@@ -11,7 +11,7 @@ get_db = database.get_db
 
 
 # Get all conests
-@router.get("/contests", status_code=status.HTTP_201_CREATED, response_model=List[schemas.show_create_contest_List])
+@router.get("/contests/", status_code=status.HTTP_201_CREATED, response_model=List[schemas.show_create_contest_List])
 def show_contest(db: Session = Depends(get_db)):
     return contests.all_contests(db)
 
