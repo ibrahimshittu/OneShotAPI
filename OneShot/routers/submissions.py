@@ -1,8 +1,10 @@
-from fastapi import APIRouter, Depends, status, HTTPException
+from fastapi import APIRouter, Depends, status, HTTPException, File, Form, UploadFile
 from sqlalchemy.orm import Session
-from typing import List
+from typing import List, Optional
 from .. import schemas, database, models
 from OneShot.Dependencies import contests
+import os
+import shutil
 
 
 router = APIRouter(tags=['Submission'], prefix="/contest")
@@ -31,26 +33,28 @@ get_db = database.get_db
 #         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.post('/{contest_id}/submission')
-def submit_submission(contest_id: int, users_id: int, submission_details: schemas.essay_submission, db: Session = Depends(get_db)):
-    contests_category = db.query(models.create_contest).filter(
-        models.create_contest.id == contest_id)
-    # contests_category2 = db.query(models.create_contest).filter(
-    # models.create_contest.id == contest_id).filter(models.create_contest.contest_category == schemas.ContestType.Essay_Contest).first()
+@router.post('/{contest_id}/submission', status_code=status.HTTP_201_CREATED)
+async def submit_submission(contest_id: int, users_id: int, body: Optional[str] = None,
+                            db: Session = Depends(get_db), file: Optional[UploadFile] = File(None)):
+    contest = db.query(models.create_contest).filter(
+        models.create_contest.id == contest_id).first()
 
-    if contests_category.filter(models.create_contest.contest_category == schemas.ContestType.Essay_Contest).first():
-        new_submission = models.essay_submission(
-            **submission_details.dict(), users_id=users_id, contest_id=contest_id)
-    elif contests_category.filter(models.create_contest.contest_category == schemas.ContestType.Image_Contest).first():
-        # new_submission = models.essay_submission(
-        #     **submission_details.dict(), users_id=users_id, contest_id=contest_id)
-        return "hello"
-    elif contests_category.filter(models.create_contest.contest_category == schemas.ContestType.Video_Contest).first():
-        # new_submission = models.essay_submission(
-        #     **submission_details.dict(), users_id=users_id, contest_id=contest_id)
-        return "hi"
-    else:
+    # contests_category2 = db.query(models.create_contest).filter(
+    # models.create_contest.id == contest_id).
+    # filter(models.create_contest.contest_category == schemas.ContestType.Essay_Contest).first()
+
+    if not contest:
         return HTTPException(status_code=404, detail="Contest not found")
+    else:
+        try:
+            file_location = f"media/{file.filename}"
+            with open(file_location, "wb") as img:
+                shutil.copyfileobj(file.file, img)
+            url = str(f'media/{file.filename}')
+        except Exception as e:
+            url = ""
+        new_submission = models.essay_submission(image=url, body=body,
+                                                 users_id=users_id, contest_id=contest_id)
     db.add(new_submission)
     db.commit()
     db.refresh(new_submission)

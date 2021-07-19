@@ -128,4 +128,4 @@ class show_comment_reply(BaseModel):
 
 class essay_submission(BaseModel):
     created_date: datetime
-    body: str = Field(..., max_length=300)
+    body: str = Field(..., max_length=3000)
