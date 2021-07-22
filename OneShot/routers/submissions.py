@@ -27,10 +27,10 @@ async def submit_submission(contest_id: int, users_id: int, body: Optional[str] 
                     shutil.copyfileobj(files.file, img)
 
                 url = f'media/{[files.filename for files in file]}'
-        except Exception as e:
+        except:
             url = ""
-        new_submission = models.essay_submission(image=url, body=body,
-                                                 users_id=users_id, contest_id=contest_id)
+        new_submission = models.submission(image=url, body=body,
+                                           users_id=users_id, contest_id=contest_id)
     db.add(new_submission)
     db.commit()
     db.refresh(new_submission)
@@ -39,8 +39,8 @@ async def submit_submission(contest_id: int, users_id: int, body: Optional[str] 
 
 @router.get('/{contest_id}/submission/', response_model=List[schemas.essay_submission_list], status_code=status.HTTP_200_OK)
 def get_submission(contest_id: int, db: Session = Depends(get_db)):
-    submission = db.query(models.essay_submission).filter(
-        models.essay_submission.contest_id == contest_id).all()
+    submission = db.query(models.submission).filter(
+        models.submission.contest_id == contest_id).all()
     if not submission:
         return HTTPException(status_code=404, detail="Submission not found")
     return submission
@@ -48,9 +48,9 @@ def get_submission(contest_id: int, db: Session = Depends(get_db)):
 
 @router.get('/{contest_id}/submission/{submission_id}', response_model=schemas.essay_submission_list)
 def get_submission_by_id(contest_id: int, submission_id: int, db: Session = Depends(get_db)):
-    submission = db.query(models.essay_submission).filter(
-        models.essay_submission.contest_id == contest_id).filter(
-        models.essay_submission.id == submission_id).first()
+    submission = db.query(models.submission).filter(
+        models.submission.contest_id == contest_id).filter(
+        models.submission.id == submission_id).first()
     if not submission:
         return HTTPException(status_code=404, detail="Submission not found")
     return submission

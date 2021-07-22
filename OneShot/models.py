@@ -24,7 +24,7 @@ class create_contest(Base):
     owner = relationship("User", back_populates="items")
     comment_items = relationship(
         "Comments", back_populates="contest_items")
-    essay_sub = relationship("essay_submission", back_populates="contest")
+    essay_sub = relationship("submission", back_populates="contest")
     # image_sub = relationship(
     #     "image_submission", back_populates="image_contest")
 
@@ -42,7 +42,7 @@ class User(Base):
 
     items = relationship("create_contest", back_populates="owner")
     comment_items = relationship("Comments", back_populates="user_items")
-    submission = relationship("essay_submission", back_populates="contestant")
+    submission = relationship("submission", back_populates="contestant")
 
     # image_submission = relationship(
     #     "image_submission", back_populates="image_contestant")
@@ -64,12 +64,12 @@ class Comments(Base):
         "create_contest", back_populates="comment_items")
 
 
-class essay_submission(Base):
-    __tablename__ = "Essay Submission"
+class submission(Base):
+    __tablename__ = "Submission"
 
     id = Column(Integer, primary_key=True, index=True)
     created_date = Column(DateTime, default=datetime.datetime.utcnow)
-    image = Column(URLType)
+    image = Column(URLType, default=None)
     body = Column(String)
     users_id = Column(Integer, ForeignKey("users.id"))
     contest_id = Column(Integer, ForeignKey("contests.id"))
