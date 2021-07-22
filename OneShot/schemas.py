@@ -92,7 +92,7 @@ class show_create_contest_List(BaseModel):
     end_date: date
     published: Optional[bool] = False
     owner: Show_user_List
-    comment_items:  List[show_comments] = []
+    #comment_items:  List[show_comments] = []
 
     class Config():
         orm_mode = True
@@ -111,7 +111,7 @@ class comments_List(BaseModel):
 
 class essay_submission(BaseModel):
     created_date: datetime
-    body: Optional[str] = Field(..., max_length=3000)
+    body: Optional[str]
 
 
 class essay_submission_list(essay_submission):

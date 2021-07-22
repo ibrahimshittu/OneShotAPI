@@ -25,8 +25,6 @@ class create_contest(Base):
     comment_items = relationship(
         "Comments", back_populates="contest_items")
     essay_sub = relationship("submission", back_populates="contest")
-    # image_sub = relationship(
-    #     "image_submission", back_populates="image_contest")
 
 
 class User(Base):
@@ -43,9 +41,6 @@ class User(Base):
     items = relationship("create_contest", back_populates="owner")
     comment_items = relationship("Comments", back_populates="user_items")
     submission = relationship("submission", back_populates="contestant")
-
-    # image_submission = relationship(
-    #     "image_submission", back_populates="image_contestant")
 
 
 class Comments(Base):
