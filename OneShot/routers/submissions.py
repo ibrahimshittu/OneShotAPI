@@ -43,16 +43,17 @@ async def submit_submission(contest_id: int, users_id: int, body: Optional[str] 
     return new_submission
 
 
-@router.get('/{contest_id}/submission/', response_model=List[schemas.essay_submission_list], status_code=status.HTTP_200_OK)
+@router.get('/{contest_id}/submissions/', status_code=status.HTTP_200_OK, response_model=List[schemas.submission_list])
 def get_submission(contest_id: int, db: Session = Depends(get_db)):
     submission = db.query(models.submission).filter(
         models.submission.contest_id == contest_id).all()
-    if not submission:
-        return HTTPException(status_code=404, detail="Submission not found")
+    # if not submission:
+    #     return List[schemas.submission_list(submission=[])]
+    #     return HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No Submission yet for this contest")
     return submission
 
 
-@router.get('/{contest_id}/submission/{submission_id}', response_model=schemas.essay_submission_list)
+@router.get('/{contest_id}/submission/{submission_id}', response_model=schemas.submission_list)
 def get_submission_by_id(contest_id: int, submission_id: int, db: Session = Depends(get_db)):
     submission = db.query(models.submission).filter(
         models.submission.contest_id == contest_id).filter(

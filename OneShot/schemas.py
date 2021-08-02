@@ -1,5 +1,4 @@
 from pydantic import BaseModel
-from pydantic_choices import choice
 from typing import Optional, List
 from datetime import date, datetime
 from enum import Enum
@@ -15,7 +14,7 @@ class ContestType(str, Enum):
 
 class create_contest(BaseModel):
     contest_name: str
-    contest_description: str = Field(..., max_length=300)
+    contest_description: str = Field(..., max_length=500)
     contest_prize: str
     contest_category: ContestType
     start_date: date
@@ -109,14 +108,28 @@ class comments_List(BaseModel):
     contest_items: show_create_contest_List
 
 
-class essay_submission(BaseModel):
+class submission(BaseModel):
     created_date: datetime
-    body: Optional[str]
+    body: Optional[str] = None
 
 
-class essay_submission_list(essay_submission):
-    image: str
+class submission_list(submission):
+    image: Optional[str] = None
     contestant: Show_user_List
 
     class Config():
         orm_mode = True
+
+
+class UserLogin(BaseModel):
+    email: str
+    password: str
+
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+
+class TokenData(BaseModel):
+    username: Optional[str] = None
