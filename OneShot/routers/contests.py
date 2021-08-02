@@ -4,6 +4,8 @@ from typing import List
 from .. import schemas, database, models
 from OneShot.Dependencies import contests
 
+from .oauth2 import get_current_active_user, get_current_user
+
 
 router = APIRouter(tags=['Contests'])
 
@@ -18,8 +20,18 @@ def show_contest(db: Session = Depends(get_db)):
 
 # create a new contest
 @router.post("/create_contest", status_code=status.HTTP_201_CREATED)
-async def create_contest(contest_details: schemas.create_contest, db: Session = Depends(get_db)):
-    return contests.create(contest_details, db)
+def create_contest(contest_details: schemas.create_contest, db: Session = Depends(get_db), current_user: schemas.User = Depends(get_current_user)):
+
+    new_contest = models.create_contest(
+        contest_name=contest_details.contest_name, contest_description=contest_details.contest_description,
+        contest_prize=contest_details.contest_prize, contest_category=contest_details.contest_category, end_date=contest_details.end_date,
+        start_date=contest_details.start_date, published=contest_details.published, owner_id=current_user)
+    db.add(new_contest)
+    db.commit()
+    db.refresh(new_contest)
+    return new_contest
+
+    # return contests.create(contest_details=contest_details, db=db, current_user=user_id)
 
 
 # Get contest by ID

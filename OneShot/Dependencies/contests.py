@@ -11,11 +11,11 @@ def all_contests(db: Session):
     return contest
 
 
-def create(contest_details, db: Session):
+def create(contest_details, db: Session, current_user: int):
     new_contest = models.create_contest(
         contest_name=contest_details.contest_name, contest_description=contest_details.contest_description,
         contest_prize=contest_details.contest_prize, contest_category=contest_details.contest_category, end_date=contest_details.end_date,
-        start_date=contest_details.start_date, published=contest_details.published, owner_id=2)
+        start_date=contest_details.start_date, published=contest_details.published, owner_id=current_user)
     db.add(new_contest)
     db.commit()
     db.refresh(new_contest)

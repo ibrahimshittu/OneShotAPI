@@ -7,6 +7,8 @@ from .. import schemas, database, models
 from ..hashing import Hash
 
 from datetime import datetime, timedelta
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+
 from .token import create_access_token, ACCESS_TOKEN_EXPIRE_MINUTES
 
 
@@ -14,9 +16,9 @@ router = APIRouter(tags=["authentication"], prefix="/authentication")
 
 
 @router.post('/login')
-async def login(user_details: schemas.UserLogin, db: Session = Depends(database.get_db)):
+async def login(user_details: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(database.get_db)):
     user = db.query(models.User).filter(
-        models.User.email == user_details.email).first()
+        models.User.email == user_details.username).first()
     if user:
         if not Hash.verify_password(user_details.password, user.password):
             raise HTTPException(

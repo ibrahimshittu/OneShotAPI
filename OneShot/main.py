@@ -1,9 +1,9 @@
 from OneShot.routers import authentication
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from . import models
 from .database import engine
-from .routers import contests, users, comments, submissions, authentication
+from .routers import contests, users, comments, submissions, authentication, oauth2
 
 
 models.Base.metadata.create_all(bind=engine)
@@ -27,5 +27,7 @@ app.add_middleware(
 app.include_router(contests.router)
 app.include_router(authentication.router)
 app.include_router(users.router)
-app.include_router(submissions.router)
-app.include_router(comments.router)
+app.include_router(submissions.router, dependencies=[
+                   Depends(oauth2.oauth2_scheme)])
+app.include_router(comments.router, dependencies=[
+                   Depends(oauth2.oauth2_scheme)])

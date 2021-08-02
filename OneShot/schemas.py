@@ -31,7 +31,7 @@ class User(BaseModel):
     name: str
     email: str
     password: str
-    is_active: bool = True
+    is_active: Optional[bool] = None
     is_superuser: bool = False
 
 
@@ -132,4 +132,4 @@ class Token(BaseModel):
 
 
 class TokenData(BaseModel):
-    username: Optional[str] = None
+    email: Optional[str] = None
