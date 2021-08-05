@@ -31,28 +31,40 @@ def show(id: int, db: Session):
     return contest
 
 
-def update(id: int, contest_details: schemas.create_contest, db: Session):
+def update(id: int, contest_details: schemas.create_contest, db: Session, current_user: int):
     contest = db.query(models.create_contest).filter(
         models.create_contest.id == id).first()
     if not contest:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail=f'Contest with id {id} not found')
     else:
-        contest = db.query(models.create_contest).filter(models.create_contest.id == id).update(
-            contest_details.dict(), synchronize_session=False)
+        contest = db.query(models.create_contest).filter(
+            models.create_contest.id == id).filter(models.create_contest.owner_id == current_user).first()
+        if contest:
+            contest = db.query(models.create_contest).filter(models.create_contest.id == id).update(
+                contest_details.dict(), synchronize_session=False)
+        else:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+                                detail="You are not alowed to edit this contest")
     db.commit()
     return "contest has updated successfully"
 
 
-def delete(id: int, db: Session):
+def delete(id: int, db: Session, current_user: int):
     contest = db.query(models.create_contest).filter(
         models.create_contest.id == id).first()
     if not contest:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail=f'Contest with id {id} not found')
-
-    db.query(models.create_contest).filter(
-        models.create_contest.id == id).delete(synchronize_session=False)
+    else:
+        contest = db.query(models.create_contest).filter(
+            models.create_contest.id == id).filter(models.create_contest.owner_id == current_user).first()
+        if contest:
+            db.query(models.create_contest).filter(
+                models.create_contest.id == id).delete(synchronize_session=False)
+        else:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+                                detail="You are not alowed to delete this contest")
     db.commit()
     return "Contest successfully deleted"
 

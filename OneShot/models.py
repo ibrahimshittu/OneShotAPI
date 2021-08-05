@@ -32,7 +32,7 @@ class User(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String)
-    email = Column(EmailType)
+    email = Column(String, unique=True, index=True, nullable=False)
     password = Column(String)
     created_date = Column(DateTime, default=datetime.datetime.utcnow)
     is_active = Column(Boolean, default=True)

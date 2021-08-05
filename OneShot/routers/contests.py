@@ -13,25 +13,9 @@ get_db = database.get_db
 
 
 # Get all conests
-@router.get("/contests/", status_code=status.HTTP_201_CREATED, response_model=List[schemas.show_create_contest_List])
+@router.get("/contests/", status_code=status.HTTP_202_ACCEPTED, response_model=List[schemas.show_create_contest_List])
 def show_contest(db: Session = Depends(get_db)):
     return contests.all_contests(db)
-
-
-# create a new contest
-@router.post("/create_contest", status_code=status.HTTP_201_CREATED)
-def create_contest(contest_details: schemas.create_contest, db: Session = Depends(get_db), current_user: schemas.User = Depends(get_current_user)):
-
-    new_contest = models.create_contest(
-        contest_name=contest_details.contest_name, contest_description=contest_details.contest_description,
-        contest_prize=contest_details.contest_prize, contest_category=contest_details.contest_category, end_date=contest_details.end_date,
-        start_date=contest_details.start_date, published=contest_details.published, owner_id=current_user)
-    db.add(new_contest)
-    db.commit()
-    db.refresh(new_contest)
-    return new_contest
-
-    # return contests.create(contest_details=contest_details, db=db, current_user=user_id)
 
 
 # Get contest by ID
@@ -40,16 +24,22 @@ async def show_contest(id: int, db: Session = Depends(get_db)):
     return contests.show(id, db)
 
 
+# create a new contest
+@router.post("/create_contest", status_code=status.HTTP_201_CREATED)
+def create_contest(contest_details: schemas.create_contest, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
+    return contests.create(contest_details=contest_details, db=db, current_user=current_user.id)
+
+
 # Update contest by ID
 @router.put('/update_contest/{id}', status_code=status.HTTP_202_ACCEPTED)
-async def update_contest(id: int, contest_details: schemas.create_contest, db: Session = Depends(get_db)):
-    return contests.update(id, contest_details, db)
+async def update_contest(id: int, contest_details: schemas.create_contest, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
+    return contests.update(id, contest_details, db, current_user.id)
 
 
 # Delete contest by ID
 @router.delete('/delete_contest/{id}', status_code=status.HTTP_204_NO_CONTENT)
-async def delete_contest(id: int, db: Session = Depends(get_db)):
-    return contests.delete(id, db)
+async def delete_contest(id: int, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
+    return contests.delete(id, db, current_user.id)
 
 
 @router.get("/essay_contests")

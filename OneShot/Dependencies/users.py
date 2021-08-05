@@ -5,6 +5,11 @@ from .. import schemas, database, models
 from ..hashing import *
 
 
+def get_user(db: Session, email: str):
+    user = db.query(models.User).filter(models.User.email == email).first()
+    return user
+
+
 def register(user_details: schemas.User, db: Session):
     new_user = models.User(
         name=user_details.name, email=user_details.email, password=Hash.pasword_hashing(user_details.password), is_active=user_details.is_active, is_superuser=user_details.is_superuser)
