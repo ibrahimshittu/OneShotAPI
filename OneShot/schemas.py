@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 from typing import Optional, List
 from datetime import date, datetime
 from enum import Enum
@@ -133,3 +133,7 @@ class Token(BaseModel):
 
 class TokenData(BaseModel):
     email: Optional[str] = None
+
+
+class EmailSchema(BaseModel):
+    email: List[EmailStr]

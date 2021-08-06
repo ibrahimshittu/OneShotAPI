@@ -5,10 +5,14 @@ from typing import Optional
 from .. import schemas
 from OneShot.Dependencies import users
 from sqlalchemy.orm import Session
+import secrets
 
 SECRET_KEY = "70da40ffc09cc0d1a5004a738005d13153116f9f4f1557414e6bf722c29e7cad"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
+
+PASSWORD_RESET_TOKEN: int = secrets.token_urlsafe(32)
+ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 8
 
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
@@ -35,3 +39,14 @@ def verify_token(db: Session, token: str, credentials_exception):
     if user is None:
         raise credentials_exception
     return user
+
+
+def generate_password_reset_token(email: str) -> str:
+    delta = timedelta(hours=ACCESS_TOKEN_EXPIRE_MINUTES)
+    now = datetime.utcnow()
+    expires = now + delta
+    exp = expires.timestamp()
+    encoded_jwt = jwt.encode(
+        {"exp": exp, "nbf": now, "sub": email}, PASSWORD_RESET_TOKEN, algorithm="HS256",
+    )
+    return encoded_jwt
