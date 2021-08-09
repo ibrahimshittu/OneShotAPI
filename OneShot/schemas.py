@@ -137,3 +137,7 @@ class TokenData(BaseModel):
 
 class EmailSchema(BaseModel):
     email: List[EmailStr]
+
+
+class PasswordResetResponse(BaseModel):
+    msg: str

@@ -1,12 +1,13 @@
-from fastapi import APIRouter, Depends, status, HTTPException
+from fastapi import APIRouter, Depends, status, HTTPException, Body
 from sqlalchemy.orm import Session
-from typing import List
+from typing import List, Any
 from .. import schemas, database, models
 from ..hashing import *
 from OneShot.Dependencies import users
 from .oauth2 import get_current_active_user, get_current_user
-from .token import generate_password_reset_token
+from .token import generate_password_reset_token, verify_password_reset_token
 from OneShot.Dependencies import mail
+from ..hashing import *
 
 router = APIRouter(tags=['Users'])
 
@@ -26,7 +27,25 @@ async def create_reset_password(email: str, db: Session = Depends(get_db)):
             status_code=404, detail="The user with this email does not exist in the system.")
     password_reset_token = generate_password_reset_token(email=email)
     await mail.send(email, password_reset_token)
-    return {"msg": "Password recovery email sent"}
+    return {"msg": "Password recovery email sent", "token": password_reset_token}
+
+# reset password
+@router.post("/reset-password/", response_model=schemas.PasswordResetResponse, status_code=status.HTTP_201_CREATED)
+async def reset_password(token: str = Body(...), new_password: str = Body(...), db: Session = Depends(get_db),) -> Any:
+    email = verify_password_reset_token(token)
+    if not email:
+        raise HTTPException(status_code=400, detail="Invalid token")
+    user = users.get_user(db, email=email)
+    if not user:
+        raise HTTPException(
+            status_code=404,
+            detail="The user with this email does not exist in the system.",
+        )
+    hashed_password = Hash.pasword_hashing(new_password)
+    user.password = hashed_password
+    db.add(user)
+    db.commit()
+    return {"msg": "Password updated successfully"}
 
 
 @router.get('/user/{id}', response_model=schemas.Show_user)

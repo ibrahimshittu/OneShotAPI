@@ -7,15 +7,15 @@ from typing import List
 
 
 conf = ConnectionConfig(
-    MAIL_USERNAME="LiveClasses",
-    MAIL_PASSWORD="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",
+    MAIL_USERNAME='ibshittu01@students.unilorin.edu.ng',
+    MAIL_PASSWORD='goatheadman',
     MAIL_FROM="mail@oneshot.io",
-    MAIL_PORT=465,
-    MAIL_SERVER="smtp.sendgrid.net",
+    MAIL_PORT=587,
+    MAIL_SERVER='smtp.gmail.com',
     MAIL_TLS=True,
     MAIL_SSL=False,
     USE_CREDENTIALS=True,
-    VALIDATE_CERTS=True
+    # VALIDATE_CERTS=False
 )
 
 
