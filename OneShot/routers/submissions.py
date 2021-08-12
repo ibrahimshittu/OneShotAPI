@@ -6,6 +6,7 @@ from OneShot.Dependencies import contests
 import os
 import shutil
 import datetime
+from .oauth2 import get_current_active_user, get_current_user
 
 
 router = APIRouter(tags=['Submission'], prefix="/contest")
@@ -14,7 +15,7 @@ get_db = database.get_db
 
 
 @router.post('/{contest_id}/submission', status_code=status.HTTP_201_CREATED)
-async def submit_submission(contest_id: int, users_id: int, body: Optional[str] = None,
+async def submit_submission(contest_id: int, current_user: models.User = Depends(get_current_user), body: Optional[str] = None,
                             db: Session = Depends(get_db), files: Optional[List[UploadFile]] = File(None)):
     contest = db.query(models.create_contest).filter(
         models.create_contest.id == contest_id).first()
@@ -35,7 +36,7 @@ async def submit_submission(contest_id: int, users_id: int, body: Optional[str] 
         # except:
         #     url = ""
         new_submission = models.submission(image=url, body=body,
-                                           users_id=users_id, contest_id=contest_id)
+                                           users_id=current_user.id, contest_id=contest_id)
 
     db.add(new_submission)
     db.commit()

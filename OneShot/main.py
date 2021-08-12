@@ -3,7 +3,7 @@ from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from . import models
 from .database import engine
-from .routers import contests, users, comments, submissions, authentication, oauth2
+from .routers import contests, users, comments, submissions, authentication, oauth2, votes
 
 
 models.Base.metadata.create_all(bind=engine)
@@ -31,3 +31,4 @@ app.include_router(submissions.router, dependencies=[
                    Depends(oauth2.oauth2_scheme)])
 app.include_router(comments.router, dependencies=[
                    Depends(oauth2.oauth2_scheme)])
+app.include_router(votes.router)

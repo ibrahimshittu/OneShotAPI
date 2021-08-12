@@ -41,6 +41,7 @@ class User(Base):
     items = relationship("create_contest", back_populates="owner")
     comment_items = relationship("Comments", back_populates="user_items")
     submission = relationship("submission", back_populates="contestant")
+    votes = relationship("votes", back_populates="voter")
 
 
 class Comments(Base):
@@ -71,3 +72,16 @@ class submission(Base):
 
     contestant = relationship("User", back_populates="submission")
     contest = relationship("create_contest", back_populates="essay_sub")
+
+    voter = relationship("votes", back_populates="contest_submission")
+
+
+class votes(Base):
+    __tablename__ = "votes"
+    id = Column(Integer, primary_key=True, index=True)
+    created_date = Column(DateTime, default=datetime.datetime.utcnow)
+    user = Column(Integer, ForeignKey("users.id"))
+    submission = Column(Integer, ForeignKey("Submission.id"))
+
+    contest_submission = relationship("submission", back_populates="voter")
+    voter = relationship("User", back_populates="votes")
