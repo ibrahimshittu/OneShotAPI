@@ -11,6 +11,9 @@ def get_user(db: Session, email: str):
 
 
 def register(user_details: schemas.User, db: Session):
+    if get_user(db, user_details.email):
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT,
+                            detail="User already exists!")
     new_user = models.User(
         name=user_details.name, email=user_details.email, password=Hash.pasword_hashing(user_details.password), is_active=user_details.is_active, is_superuser=user_details.is_superuser)
     db.add(new_user)

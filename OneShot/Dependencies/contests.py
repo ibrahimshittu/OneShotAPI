@@ -12,6 +12,11 @@ def all_contests(db: Session):
 
 
 def create(contest_details, db: Session, current_user: int):
+    contest_check = db.query(models.create_contest).filter(
+        models.create_contest.contest_name == contest_details.contest_name).first()
+    if contest_check:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT,
+                            detail="Contest already exists!")
     new_contest = models.create_contest(
         contest_name=contest_details.contest_name, contest_description=contest_details.contest_description,
         contest_prize=contest_details.contest_prize, contest_category=contest_details.contest_category, end_date=contest_details.end_date,
