@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, status, HTTPException, File, Form, UploadFile
+from fastapi import APIRouter, Depends, status, HTTPException, File, Form, UploadFile, Body
 from sqlalchemy.orm import Session
 from typing import List, Optional
 from .. import schemas, database, models
@@ -7,7 +7,8 @@ import os
 import shutil
 import datetime
 from .oauth2 import get_current_active_user, get_current_user
-
+import cloudinary
+import cloudinary.uploader
 
 router = APIRouter(tags=['Submission'], prefix="/contest")
 
@@ -15,7 +16,7 @@ get_db = database.get_db
 
 
 @router.post('/{contest_id}/submission', status_code=status.HTTP_201_CREATED)
-async def submit_submission(contest_id: int, current_user: models.User = Depends(get_current_user), body: Optional[str] = None,
+async def submit_submission(contest_id: int, current_user: models.User = Depends(get_current_user), body: Optional[str] = Body(None),
                             db: Session = Depends(get_db), files: Optional[List[UploadFile]] = File(None)):
     contest = db.query(models.create_contest).filter(
         models.create_contest.id == contest_id).first()
@@ -27,16 +28,17 @@ async def submit_submission(contest_id: int, current_user: models.User = Depends
         if contest.end_date < datetime.date.today():
             return HTTPException(status_code=400, detail="Contest already ended")
         else:
-            for file in files:
-                file_location = f"media/{file.filename}"
-                with open(file_location, "wb") as img:
-                    shutil.copyfileobj(file.file, img)
 
-            url = f'media/{[file.filename]}'
-        # except:
-        #     url = ""
-        new_submission = models.submission(image=url, body=body,
-                                           users_id=current_user.id, contest_id=contest_id)
+            for files in files:
+                try:
+                    result = cloudinary.uploader.upload(
+                        files.file, resource_type="auto")
+                    url = result.get("url")
+                except:
+                    url = None
+
+    new_submission = models.submission(image=url, body=body,
+                                       users_id=current_user.id, contest_id=contest_id)
 
     db.add(new_submission)
     db.commit()

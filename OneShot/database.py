@@ -1,7 +1,14 @@
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+import cloudinary
 
+
+cloudinary.config(
+    cloud_name="ibrahimshittu",
+    api_key="793414486634793",
+    api_secret="uiNj3l17APWUpa2VABYJyKWvUw8"
+)
 
 SQLALCHEMY_DATABASE_URL = "sqlite:///./oneshot.db"
 # SQLALCHEMY_DATABASE_URL = "postgresql://user:password@postgresserver/db"
@@ -13,7 +20,8 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
 
-#Dependency
+
+# Dependency Injection
 def get_db():
     db = SessionLocal()
     try:
