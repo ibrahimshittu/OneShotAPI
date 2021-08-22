@@ -16,8 +16,8 @@ get_db = database.get_db
 
 
 @router.post('/{contest_id}/submission', status_code=status.HTTP_201_CREATED)
-async def submit_submission(contest_id: int, current_user: models.User = Depends(get_current_user), body: Optional[str] = Body(None),
-                            db: Session = Depends(get_db), files: Optional[List[UploadFile]] = File(None)):
+async def submit_submission(contest_id: int, current_user: models.User = Depends(get_current_user),
+                            db: Session = Depends(get_db), files: Optional[List[UploadFile]] = File(None), body: Optional[str] = None):
     contest = db.query(models.create_contest).filter(
         models.create_contest.id == contest_id).first()
     if not contest:
@@ -28,21 +28,27 @@ async def submit_submission(contest_id: int, current_user: models.User = Depends
         if contest.end_date < datetime.date.today():
             return HTTPException(status_code=400, detail="Contest already ended")
         else:
+            try:
+                for files in files:
 
-            for files in files:
-                try:
                     result = cloudinary.uploader.upload(
                         files.file, resource_type="auto")
                     url = result.get("url")
-                except:
-                    url = None
 
-    new_submission = models.submission(image=url, body=body,
-                                       users_id=current_user.id, contest_id=contest_id)
+                    new_submission = models.submission(image=url, body=body,
+                                                       users_id=current_user.id, contest_id=contest_id)
+                    db.add(new_submission)
+                    db.commit()
+                    db.refresh(new_submission)
+            except:
+                url = None or ""
 
-    db.add(new_submission)
-    db.commit()
-    db.refresh(new_submission)
+            new_submission = models.submission(image=url, body=body,
+                                               users_id=current_user.id, contest_id=contest_id)
+
+            db.add(new_submission)
+            db.commit()
+            db.refresh(new_submission)
     return new_submission
 
 
@@ -50,9 +56,6 @@ async def submit_submission(contest_id: int, current_user: models.User = Depends
 def get_submission(contest_id: int, db: Session = Depends(get_db)):
     submission = db.query(models.submission).filter(
         models.submission.contest_id == contest_id).all()
-    # if not submission:
-    #     return List[schemas.submission_list(submission=[])]
-    #     return HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No Submission yet for this contest")
     return submission
 
 
@@ -64,6 +67,38 @@ def get_submission_by_id(contest_id: int, submission_id: int, db: Session = Depe
     if not submission:
         return HTTPException(status_code=404, detail="Submission not found")
     return submission
+
+
+@router.put('/{contest_id}/submission/{submission_id}/update')
+def update(contest_id: int, submission_id: int, body: Optional[str], files: Optional[List[UploadFile]] = File(None),  db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
+    submission = db.query(models.submission).filter(
+        models.submission.contest_id == contest_id).filter(
+        models.submission.id == submission_id)
+    contest = db.query(models.create_contest).filter(
+        models.create_contest.id == contest_id).first()
+    if not submission.first():
+        return HTTPException(status_code=404, detail="Submission not found")
+    else:
+        if contest.end_date < datetime.date.today():
+            return HTTPException(status_code=400, detail="You can't update your submission, Contest already ended")
+    user_submission = submission.filter(
+        models.submission.users_id == current_user.id).first()
+    if user_submission:
+        try:
+            for files in files:
+
+                result = cloudinary.uploader.upload(
+                    files.file, resource_type="auto")
+                url = result.get("url")
+        except:
+            url = None
+        submission.update({models.submission.image: url, models.submission.body: body, models.submission.users_id: current_user.id,
+                           models.submission.contest_id: contest_id}, synchronize_session=False)
+    else:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+                            detail="You are not alowed to edit this contest")
+    db.commit()
+    return "Submission has updated successfully"
 
 
 @router.delete('/{contest_id}/submission/{id}/delete')
