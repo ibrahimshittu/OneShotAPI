@@ -113,9 +113,20 @@ class submission(BaseModel):
     body: Optional[str] = None
 
 
+class votes(BaseModel):
+    created_date: datetime
+    user: int
+    #submission: int
+
+    class Config():
+        orm_mode = True
+
+
 class submission_list(submission):
     image: Optional[str] = None
     contestant: Show_user_List
+    # voter: str
+    voter: List[votes] = []
 
     class Config():
         orm_mode = True
