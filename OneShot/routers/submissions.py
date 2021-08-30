@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, status, HTTPException, File, Form, UploadFile, Body
 from sqlalchemy.orm import Session
+from sqlalchemy import desc, asc
 from typing import List, Optional
 from .. import schemas, database, models
 from OneShot.Dependencies import contests
@@ -55,7 +56,7 @@ async def submit_submission(contest_id: int, current_user: models.User = Depends
 @router.get('/{contest_id}/submissions/', status_code=status.HTTP_200_OK, response_model=List[schemas.submission_list])
 def get_submission(contest_id: int, db: Session = Depends(get_db)):
     submission = db.query(models.submission).filter(
-        models.submission.contest_id == contest_id).all()
+        models.submission.contest_id == contest_id).order_by(desc(models.submission.id)).all()
     return submission
 
 
