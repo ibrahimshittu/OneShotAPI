@@ -125,11 +125,18 @@ class votes(BaseModel):
 class submission_list(submission):
     image: Optional[str] = None
     contestant: Show_user_List
-    # voter: str
     voter: List[votes] = []
 
     class Config():
         orm_mode = True
+
+
+class single_submission(BaseModel):
+    created_date: Optional[datetime]
+    body: Optional[str]
+    image: Optional[str]
+    contestant: Optional[Show_user_List]
+    votes: int
 
 
 class UserLogin(BaseModel):

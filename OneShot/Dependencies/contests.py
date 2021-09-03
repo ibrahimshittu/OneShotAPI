@@ -1,13 +1,15 @@
 from fastapi import APIRouter, Depends, status, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
+from sqlalchemy import desc
 from .. import schemas, database, models
 
 get_db = database.get_db
 
 
 def all_contests(db: Session):
-    contest = db.query(models.create_contest).all()
+    contest = db.query(models.create_contest).order_by(
+        desc(models.create_contest.id)).all()
     return contest
 
 

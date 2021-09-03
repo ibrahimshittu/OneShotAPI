@@ -2,6 +2,8 @@ from fastapi import APIRouter, Depends, status, HTTPException, File, Form, Uploa
 from sqlalchemy.orm import Session
 from sqlalchemy import desc, asc
 from typing import List, Optional
+
+from sqlalchemy.sql.functions import count
 from .. import schemas, database, models
 from OneShot.Dependencies import contests
 import os
@@ -57,17 +59,27 @@ async def submit_submission(contest_id: int, current_user: models.User = Depends
 def get_submission(contest_id: int, db: Session = Depends(get_db)):
     submission = db.query(models.submission).filter(
         models.submission.contest_id == contest_id).order_by(desc(models.submission.id)).all()
+    # votes = db.query(models.votes).filter(
+    #     models.votes.submission == submission.id)
     return submission
 
 
-@router.get('/{contest_id}/submission/{submission_id}', response_model=schemas.submission_list)
+@router.get('/{contest_id}/submission/{submission_id}')
 def get_submission_by_id(contest_id: int, submission_id: int, db: Session = Depends(get_db)):
     submission = db.query(models.submission).filter(
         models.submission.contest_id == contest_id).filter(
         models.submission.id == submission_id).first()
+    votes = db.query(models.votes).filter(
+        models.votes.submission == submission_id)
     if not submission:
         return HTTPException(status_code=404, detail="Submission not found")
-    return submission
+    return {
+        "image": submission.image,
+        "created_date": submission.created_date,
+        "body": submission.body,
+        "contestant": submission.contestant.name,
+        "total votes": votes.count()
+    },
 
 
 @router.put('/{contest_id}/submission/{submission_id}/update')
