@@ -49,9 +49,9 @@ The REST API to OneShot - The \Contest Platform is described below.
 
 ### Request
 
-`GET /thing/`
+`GET /contests/`
 
-    curl -i -H 'Accept: application/json' http://localhost:7000/contests/
+    curl -i -H 'Accept: application/json' http://localhost:8000/contests/
 
 ### Response
 
@@ -62,19 +62,6 @@ The REST API to OneShot - The \Contest Platform is described below.
     Server: uvicorn 
 
     [
-    {
-      "contest_name": "string2",
-      "contest_description": "string",
-      "contest_prize": "string",
-      "contest_category": "Essay Contest",
-      "start_date": "2021-08-30",
-      "end_date": "2021-08-30",
-      "published": true,
-      "owner": {
-        "name": "string",
-        "email": "ibshittu01@gmail.com"
-      }
-    },
     {
       "contest_name": "string",
       "contest_description": "string",
@@ -89,4 +76,79 @@ The REST API to OneShot - The \Contest Platform is described below.
       }
     }
     ]
+   
+  ## Get Single Contest
+
+  ### Request
+
+  `GET /contests/{id}/`
+
+      curl -i -H 'Accept: application/json' http://localhost:8000/contest/{id}/
+
+  ### Response
+
+      HTTP/1.1 202 OK
+      Date: Fri,01 Oct 2021 14:16:50 GMT
+      Content-Type: application/json
+      Content-Length: 226
+      Server: uvicorn 
+
+      [
+      {
+        "contest_name": "string",
+        "contest_description": "string",
+        "contest_prize": "string",
+        "contest_category": "Essay Contest",
+        "start_date": "2021-08-12",
+        "end_date": "2021-09-12",
+        "published": true,
+        "owner": {
+          "name": "string",
+          "email": "string"
+        }
+      }
+    ]
+    
+      ## Get Single Contest
+
+  ### Request
+
+  `POST /contests/{id}/`
+
+      curl -X 'POST' \
+      'http://127.0.0.1:8000/create_contest' \
+      -H 'accept: application/json' \
+      -H 'Authorization: Bearer xxxxxxxxxxxxxxxxxxxxxxx' \
+      -H 'Content-Type: application/json' \
+      -d '{
+      "contest_name": "string34",
+      "contest_description": "string",
+      "contest_prize": "string",
+      "contest_category": "Essay Contest",
+      "start_date": "2021-10-01",
+      "end_date": "2021-10-01",
+      "published": true
+    }'
+
+  ### Response
+
+      HTTP/1.1 201 Created
+      access-control-allow-origin: http://127.0.0.1:8000 
+      content-length: 251 
+      content-type: application/json 
+      date: Fri,01 Oct 2021 14:28:58 GMT 
+      server: uvicorn 
+
+      {
+      "id": 4,
+      "contest_description": "string",
+      "contest_prize": "string",
+      "start_date": "2021-10-01",
+      "published": true,
+      "owner_id": 2,
+      "contest_name": "string3dd4",
+      "contest_category": "Essay Contest",
+      "end_date": "2021-10-01",
+      "created_date": "2021-10-01T14:28:59.471642"
+    }
 
