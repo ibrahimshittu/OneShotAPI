@@ -20,7 +20,7 @@ get_db = database.get_db
 
 @router.post('/{contest_id}/submission', status_code=status.HTTP_201_CREATED)
 async def submit_submission(contest_id: int, current_user: models.User = Depends(get_current_user),
-                            db: Session = Depends(get_db), files: Optional[List[UploadFile]] = File(None), body: Optional[str] = None):
+                            db: Session = Depends(get_db), files: Optional[List[UploadFile]] = File(None), text: Optional[str] = None):
     contest = db.query(models.create_contest).filter(
         models.create_contest.id == contest_id).first()
     if not contest:
@@ -38,15 +38,15 @@ async def submit_submission(contest_id: int, current_user: models.User = Depends
                         files.file, resource_type="auto")
                     url = result.get("url")
 
-                    new_submission = models.submission(image=url, body=body,
-                                                       users_id=current_user.id, contest_id=contest_id)
+                    new_submission = models.submission(file=url, text=text,
+                                                       user_id=current_user.id, contest_id=contest_id)
                     db.add(new_submission)
                     db.commit()
                     db.refresh(new_submission)
             except:
                 url = None or ""
 
-            new_submission = models.submission(image=url, body=body,
+            new_submission = models.submission(file=url, text=text,
                                                users_id=current_user.id, contest_id=contest_id)
 
             db.add(new_submission)
@@ -61,6 +61,7 @@ def get_submission(contest_id: int, db: Session = Depends(get_db)):
         models.submission.contest_id == contest_id).order_by(desc(models.submission.id)).all()
     # votes = db.query(models.votes).filter(
     #     models.votes.submission == submission.id)
+
     return submission
 
 
@@ -74,16 +75,16 @@ def get_submission_by_id(contest_id: int, submission_id: int, db: Session = Depe
     if not submission:
         return HTTPException(status_code=404, detail="Submission not found")
     return {
-        "image": submission.image,
+        "file": submission.file,
         "created_date": submission.created_date,
-        "body": submission.body,
+        "text": submission.text,
         "contestant": submission.contestant.name,
         "total votes": votes.count()
-    },
+    }
 
 
 @router.put('/{contest_id}/submission/{submission_id}/update')
-def update(contest_id: int, submission_id: int, body: Optional[str], files: Optional[List[UploadFile]] = File(None),  db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
+def update(contest_id: int, submission_id: int, text: Optional[str], files: Optional[List[UploadFile]] = File(None),  db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
     submission = db.query(models.submission).filter(
         models.submission.contest_id == contest_id).filter(
         models.submission.id == submission_id)
@@ -105,7 +106,7 @@ def update(contest_id: int, submission_id: int, body: Optional[str], files: Opti
                 url = result.get("url")
         except:
             url = None
-        submission.update({models.submission.image: url, models.submission.body: body, models.submission.users_id: current_user.id,
+        submission.update({models.submission.file: url, models.submission.text: text, models.submission.users_id: current_user.id,
                            models.submission.contest_id: contest_id}, synchronize_session=False)
     else:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,

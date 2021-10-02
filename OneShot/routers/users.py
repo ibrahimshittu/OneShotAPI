@@ -16,7 +16,7 @@ get_db = database.get_db
 
 @router.post('/register', status_code=status.HTTP_201_CREATED)
 async def create_user(user_details: schemas.User, db: Session = Depends(get_db)):
-    await mail.send_new_account_mail(user_details.email, user_details.name)
+    # await mail.send_new_account_mail(user_details.email, user_details.name)
     return users.register(user_details, db)
 
 # password recorvery email
