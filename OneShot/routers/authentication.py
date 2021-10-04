@@ -12,7 +12,7 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from .token import create_access_token, ACCESS_TOKEN_EXPIRE_MINUTES
 
 
-router = APIRouter(tags=["authentication"], prefix="/authentication")
+router = APIRouter(tags=["Authentication"], prefix="/auth")
 
 
 @router.post('/login')

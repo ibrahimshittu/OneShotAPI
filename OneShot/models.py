@@ -20,8 +20,13 @@ class User(Base):
 
     items = relationship("create_contest", back_populates="owner")
     comment_items = relationship("Comments", back_populates="user_items")
-    submission = relationship("submission", back_populates="contestant")
-    votes = relationship("votes", back_populates="voter")
+    submission = relationship("submission", back_populates="contestant", cascade="all, delete",
+                              passive_deletes=True)
+    votes = relationship("votes", back_populates="voter", cascade="all, delete",
+                         passive_deletes=True)
+
+    wishlists = relationship("wishlist", back_populates="user_item", cascade="all, delete",
+                             passive_deletes=True)
 
 
 class create_contest(Base):
@@ -44,6 +49,11 @@ class create_contest(Base):
     sub = relationship("submission", back_populates="contest", cascade="all, delete",
                        passive_deletes=True)
 
+    wishlists = relationship("wishlist", back_populates="contests_items",
+                             cascade="all, delete",
+                             passive_deletes=True
+                             )
+
 
 class submission(Base):
     __tablename__ = "Submission"
@@ -52,7 +62,7 @@ class submission(Base):
     created_date = Column(DateTime, default=datetime.datetime.utcnow)
     file = Column(String, default=None)
     text = Column(String, default=None)
-    user_id = Column(Integer, ForeignKey("users.id"))
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"))
     contest_id = Column(Integer, ForeignKey("contests.id", ondelete="CASCADE"))
 
     contestant = relationship("User", back_populates="submission")
@@ -66,8 +76,8 @@ class votes(Base):
     __tablename__ = "votes"
     id = Column(Integer, primary_key=True, index=True)
     created_date = Column(DateTime, default=datetime.datetime.utcnow)
-    user = Column(Integer, ForeignKey("users.id"))
-    submission = Column(Integer, ForeignKey(
+    user_id = Column(Integer, ForeignKey("users.id", ondelete='CASCADE'))
+    submission_id = Column(Integer, ForeignKey(
         "Submission.id", ondelete='CASCADE'))
 
     contest_submission = relationship("submission", back_populates="voter")
@@ -88,3 +98,15 @@ class Comments(Base):
     user_items = relationship("User", back_populates="comment_items")
     contest_items = relationship(
         "create_contest", back_populates="comment_items")
+
+
+class wishlist(Base):
+    __tablename__ = "wishlist"
+
+    id = Column(Integer, primary_key=True, index=True)
+    date_added = Column(DateTime, default=datetime.datetime.utcnow)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"))
+    contest_id = Column(Integer, ForeignKey("contests.id", ondelete="CASCADE"))
+
+    user_item = relationship("User", back_populates="wishlists")
+    contests_items = relationship("create_contest", back_populates="wishlists")

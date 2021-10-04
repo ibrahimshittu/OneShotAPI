@@ -55,3 +55,24 @@ async def video_contests(db: Session = Depends(get_db)):
 @router.get("/image_contests")
 async def image_contests(db: Session = Depends(get_db)):
     return contests.image_contest(db)
+
+
+@router.post("/contest/wishlist")
+async def add_wishlist(contest_id: int, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
+    contest = db.query(models.create_contest).filter(
+        models.create_contest.id == contest_id).first()
+    wishlist = db.query(models.wishlist).filter(models.wishlist.contest_id == contest_id).filter(
+        models.wishlist.user_id == current_user.id).first()
+    if contest is None:
+        raise HTTPException(status_code=404, detail="Contest not found")
+    if current_user.id == contest.owner_id:
+        raise HTTPException(
+            status_code=400, detail="You can't add your own contest to your wishlist")
+    if wishlist:
+        raise HTTPException(
+            status_code=400, detail="You already added this contest to your wishlist")
+    wishlist = models.wishlist(contest_id=contest_id, user_id=current_user.id)
+    db.add(wishlist)
+    db.commit()
+    db.refresh(wishlist)
+    return {"msg": "successfully added to wishlist", "wishlist": wishlist}

@@ -14,7 +14,7 @@ SECRET_KEY = "70da40ffc09cc0d1a5004a738005d13153116f9f4f1557414e6bf722c29e7cad"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="authentication/login")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
 
 
 async def get_current_user(db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)):

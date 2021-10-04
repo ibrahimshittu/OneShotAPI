@@ -57,3 +57,10 @@ async def get_user(id: int, db: Session = Depends(get_db), current_user: schemas
 @router.get("/users/me")
 async def read_users_me(current_user: schemas.User = Depends(get_current_user)):
     return current_user
+
+
+@router.get("/users/wishlists")
+async def read_users_wishlists(db: Session = Depends(get_db), current_user: schemas.User = Depends(get_current_user)):
+    wishlist = db.query(models.wishlist).filter(
+        models.wishlist.user_id == current_user.id).all()
+    return wishlist
