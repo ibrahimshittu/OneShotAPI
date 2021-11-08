@@ -17,7 +17,7 @@ def vote(contest_id: int, submission_id: int, db: Session = Depends(get_db), cur
         models.submission.contest_id == contest_id).filter(
         models.submission.id == submission_id).first()
     votes = db.query(models.votes).filter(
-        models.votes.user == current_user.id).filter(models.votes.submission == submission_id)
+        models.votes.user_id == current_user.id).filter(models.votes.submission_id == submission_id)
     if contest is None:
         raise HTTPException(status_code=404, detail="Submission not found")
     elif votes.first():
@@ -25,7 +25,8 @@ def vote(contest_id: int, submission_id: int, db: Session = Depends(get_db), cur
         db.commit()
         return {'details': "successfully unvoted", 'vote count': votes.count()}
     else:
-        vote = models.votes(user=current_user.id, submission=submission_id)
+        vote = models.votes(user_id=current_user.id,
+                            submission_id=submission_id)
         db.add(vote)
         db.commit()
         db.refresh(vote)

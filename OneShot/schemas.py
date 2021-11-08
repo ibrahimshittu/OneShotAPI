@@ -2,6 +2,7 @@ from pydantic import BaseModel, EmailStr
 from typing import Optional, List
 from datetime import date, datetime
 from enum import Enum
+from uuid import UUID
 
 from pydantic import BaseModel, Field
 
@@ -126,6 +127,7 @@ class submission_list(submission):
     image: Optional[str] = None
     contestant: Show_user_List
     voter: List[votes] = []
+    #voter: int
 
     class Config():
         orm_mode = True

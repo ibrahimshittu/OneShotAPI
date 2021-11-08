@@ -33,13 +33,12 @@ async def submit_submission(contest_id: int, current_user: models.User = Depends
         else:
             try:
                 for files in files:
-
                     result = cloudinary.uploader.upload(
                         files.file, resource_type="auto")
                     url = result.get("url")
 
-                    new_submission = models.submission(file=url, text=text,
-                                                       user_id=current_user.id, contest_id=contest_id)
+                    new_submission = models.submission(
+                        file=url, text=text, user_id=current_user.id, contest_id=contest_id)
                     db.add(new_submission)
                     db.commit()
                     db.refresh(new_submission)
@@ -47,7 +46,7 @@ async def submit_submission(contest_id: int, current_user: models.User = Depends
                 url = None or ""
 
             new_submission = models.submission(file=url, text=text,
-                                               users_id=current_user.id, contest_id=contest_id)
+                                               user_id=current_user.id, contest_id=contest_id)
 
             db.add(new_submission)
             db.commit()
